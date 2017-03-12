@@ -1,0 +1,28 @@
+version: '2'
+
+services:
+  sonar-server:
+    image: sonarqube:6.2-alpine
+    ports:
+      - "${LOCAL_SONAR_SERVER_PORT}:9000"
+    environment:
+      SONARQUBE_HOME: ${SONAR_SERVER_HOME}
+      SONARQUBE_JDBC_URL: jdbc:mysql://sonar-server-db/${SONAR_SERVER_DB_NAME}?useUnicode=true&characterEncoding=utf8
+      SONARQUBE_JDBC_USERNAME: ${SONAR_SERVER_DB_USER}
+      SONARQUBE_JDBC_PASSWORD: ${SONAR_SERVER_DB_PASSWORD}
+    depends_on:
+      - sonar-server-db
+    links:
+      - sonar-server-db
+    volumes:
+      - ${LOCAL_PLUGINS_DIR}:${SONAR_SERVER_PLUGINS_DIR}
+
+  sonar-server-db:
+    image: mysql:5.6
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_DATABASE: ${SONAR_SERVER_DB_NAME}
+      MYSQL_USER: ${SONAR_SERVER_DB_USER}
+      MYSQL_PASSWORD: ${SONAR_SERVER_DB_PASSWORD}
+    volumes:
+      - ${LOCAL_DB_DIR}:/var/lib/mysql
